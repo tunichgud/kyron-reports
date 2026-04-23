@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<title>Kyron | Vikunja #2654 v2.3.0 — Nicht reproduzierbar</title>
+<style>
+:root {
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --border: #e4e4e7;
+  --muted: #6b7280;
+  --bg: #f7f7f8;
+  --card: #fff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 14px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+       background: var(--bg); color: #111; padding: 0 0 60px; }
+main { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+h1  { font-size: 20px; margin-bottom: 4px; }
+h2  { font-size: 15px; margin: 24px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+h3  { font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin: 14px 0 5px; }
+p   { margin: 6px 0; }
+a   { color: #2563eb; }
+.meta { color: var(--muted); font-size: 12px; margin-bottom: 24px; }
+code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: ui-monospace, monospace; }
+.pill { display: inline-block; background: var(--amber); color: #fff;
+        padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+        letter-spacing: .4px; text-transform: uppercase; }
+.bug-box { border-left: 4px solid var(--amber); background: var(--amber-bg);
+           padding: 16px 18px; margin: 20px 0; border-radius: 6px; }
+.bug-box .label { font-weight: 600; color: var(--amber); font-size: 11px;
+                  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.bug-box h2 { border: none; margin: 0 0 8px; font-size: 18px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+        padding: 18px 20px; margin: 14px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+th { width: 30%; color: var(--muted); font-weight: 600; white-space: nowrap; }
+ul { padding-left: 20px; margin: 6px 0; }
+li { margin: 4px 0; font-size: 13px; }
+.footer { color: var(--muted); font-size: 11px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Vikunja #2654 &mdash; Desktop app login flow: URL params stripped too quickly</h1>
+<p class="meta">
+  <a href="https://github.com/go-vikunja/vikunja/issues/2654">https://github.com/go-vikunja/vikunja/issues/2654</a>
+  &middot; Version <code>2.3.0</code>
+  &middot; <span class="pill">Nicht reproduzierbar</span>
+</p>
+
+<div class="bug-box">
+  <div class="label">Kyron-Verdict</div>
+  <h2>Nicht als Playwright-Test reproduzierbar</h2>
+  <p>
+    Drei unabhaengige Blocker verhindern die Reproduktion. Der zentrale Punkt:
+    das Issue beschreibt einen <strong>Feature-Wunsch</strong>, keinen Defekt mit
+    deterministischem RED-Kriterium.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Warum Bail-out</h2>
+  <ul>
+  <li>CLOUD_ONLY / DESKTOP_ONLY: Der Trigger sitzt im Electron-Desktop-App-Prozess (System-Browser-Aufruf beim Login), nicht im Web-Frontend. Playwright treibt einen Browser, nicht den Electron-Hauptprozess plus einen realen System-Browser.</li>
+  <li>SCHRITTE_ZU_VAGE: Kein deterministisches Kriterium testbar. 'URL parameters are cleared almost immediately' nennt keinen Schwellwert. Das Stripping ist OAuth-konformes Verhalten -- der Reporter erkennt das im Issue selbst an: 'I guess this is for security.'</li>
+  <li>UI_NICHT_AUFFINDBAR: Das gewuenschte UI (Copy-URL-Button, intermediate page, verzoegerter Redirect, manueller Login-Fallback) existiert in v2.3.0 nicht. Ein Test, der die Abwesenheit assertet, waere GRUEN, nicht ROT -- verletzt die Qualitaetsdirektive.</li>
+  <li>LABEL concern/ux: Das Repository labelt dieses Ticket selbst als 'UX polish, ergonomics, workflow complaints without a clear bug'.</li>
+</ul>
+</div>
+
+<div class="card">
+  <h2>Was das Issue wirklich anfragt</h2>
+  <p>Feature-Wunsch fuer Multi-Browser-/Multi-Profile-User: sichtbare Login-URL, Copy-Button, verzoegerter Redirect oder manueller Login-Fallback. Der Reporter erkennt selbst an, dass das Stripping der Auth-Params 'I guess this is for security' beabsichtigt ist.</p>
+
+  <h3>Vorgeschlagene UX-Verbesserungen (aus Issue-Body)</h3>
+  <ul>
+  <li>Intermediate Page mit voller Redirect-URL (inkl. Auth-Params) vor dem eigentlichen Redirect</li>
+  <li>Copy URL-Button, analog zum VS-Code-Auth-Flow</li>
+  <li>Optional: leicht verzoegerter Redirect, damit manuelles Kopieren moeglich ist</li>
+  <li>Manueller Login-Fallback in der Desktop-App</li>
+</ul>
+  <p style="margin-top:8px; color:var(--muted); font-size:12px;">
+    Kein Element davon existiert in v2.3.0 &mdash; ein Playwright-Test der die
+    Abwesenheit assertet, waere GRUEN, nicht ROT, und wuerde die Qualitaetsdirektive verletzen.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Evidence-Tabelle</h2>
+  <table>
+<tr><th>Issue</th><td>https://github.com/go-vikunja/vikunja/issues/2654</td></tr>
+<tr><th>App-Version (Bug)</th><td>2.3.0</td></tr>
+<tr><th>Verdict</th><td>NICHT_REPRODUZIERBAR</td></tr>
+<tr><th>Iterationen genutzt</th><td>0 / 3</td></tr>
+<tr><th>GitHub-Label</th><td>concern/ux — &quot;UX polish, ergonomics, workflow complaints without a clear bug&quot;</td></tr>
+<tr><th>Fix-PR verlinkt</th><td>nein</td></tr>
+<tr><th>Issue-Kommentare</th><td>0</td></tr>
+</table>
+</div>
+
+<div class="card">
+  <h2>Technische Begruendung</h2>
+
+  <h3>Architektonisch</h3>
+  <p>Vikunja 2.3.0 wechselte den Desktop-Login von internem Browser-Dialog auf 'System-Default-Browser oeffnen'. Der Bug liegt im Uebergang Electron-App -&gt; externer Browser -&gt; Callback. Ein Playwright-Browser kann weder den Electron-Start noch den Handoff zwischen zwei realen Browsern simulieren.</p>
+
+  <h3>Semantisch</h3>
+  <p>Der Auth-Code ist ein Single-Use-OAuth-Artefakt (RFC 6749 Section 10.5). Er wird nach dem Token-Austausch korrekt aus der URL entfernt. Das ist kein Defekt, sondern Sicherheitsdesign. Ein Test, der dieses korrekte Verhalten als Fehler assertet, waere falsch positiv.</p>
+
+  <h3>Scope</h3>
+  <p>Kyron-Scope (Projektmemo): 'nur UI-Bugs (Playwright-tauglich), keine Backend-only Issues'. Desktop-App + Multi-Browser-Handoff faellt ausserhalb dieses Scopes.</p>
+</div>
+
+<div class="card">
+  <h2>Was untersucht wurde</h2>
+  <ul>
+  <li>GitHub-Issue-API abgefragt: Body, Labels, Kommentare (keine Kommentare, kein Fix-PR verlinkt)</li>
+  <li>Docker-Hub geprueft: vikunja/vikunja:2.3.0 ist verfuegbar als Docker-Image</li>
+  <li>v2.3.0-Quellbaum gescannt (API git/trees): Verzeichnisstruktur des Frontends untersucht, Login.vue und Router-Routing-Logik identifiziert</li>
+  <li>System-Browser-Aufruf liegt im Electron-Main-Process (separates Desktop-Modul), nicht im Web-Frontend -- bestaetigt Befund DESKTOP_ONLY</li>
+  <li>Kein verlinkter Fix-PR, kein Root-Cause-Commit aus dem Issue</li>
+</ul>
+</div>
+
+<div class="card">
+  <h2>Empfehlung</h2>
+  <p>Nicht als Playwright-Test reproduzieren. Das Ticket ist ein legitimer UX-Verbesserungsvorschlag. Entweder (a) manuell mit zwei Browsern verifizieren und als UX-Feedback ans Vikunja-Team zurueckspiegeln, oder (b) die Electron-Codebasis via @playwright/test electron()-API adressieren -- ausserhalb von Kyron Phase 1.</p>
+</div>
+
+<p class="footer">
+  Generated by @reprod (Kyron Phase 1) &middot;
+  Kein Screenshot &mdash; Bail-out vor Browser-Interaktion &middot;
+  2026-04-23T21:56:14.982Z
+</p>
+
+</main>
+</body>
+</html>
