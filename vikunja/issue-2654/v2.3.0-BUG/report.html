@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Kyron | Vikunja #2654 v2.3.0 — Nicht reproduzierbar</title>
+<title>Kyron | Vikunja #2654 v2.3.0 — Not Reproducible</title>
 <style>
 :root {
   --amber: #d97706;
@@ -48,92 +48,92 @@ li { margin: 4px 0; font-size: 13px; }
 <p class="meta">
   <a href="https://github.com/go-vikunja/vikunja/issues/2654">https://github.com/go-vikunja/vikunja/issues/2654</a>
   &middot; Version <code>2.3.0</code>
-  &middot; <span class="pill">Nicht reproduzierbar</span>
+  &middot; <span class="pill">Not Reproducible</span>
 </p>
 
 <div class="bug-box">
-  <div class="label">Kyron-Verdict</div>
-  <h2>Nicht als Playwright-Test reproduzierbar</h2>
+  <div class="label">Kyron Verdict</div>
+  <h2>Cannot be reproduced as a Playwright test</h2>
   <p>
-    Drei unabhaengige Blocker verhindern die Reproduktion. Der zentrale Punkt:
-    das Issue beschreibt einen <strong>Feature-Wunsch</strong>, keinen Defekt mit
-    deterministischem RED-Kriterium.
+    Three independent blockers prevent reproduction. The core finding:
+    the issue describes a <strong>feature request</strong>, not a defect with
+    a deterministic RED criterion.
   </p>
 </div>
 
 <div class="card">
-  <h2>Warum Bail-out</h2>
+  <h2>Why Bail-out</h2>
   <ul>
-  <li>CLOUD_ONLY / DESKTOP_ONLY: Der Trigger sitzt im Electron-Desktop-App-Prozess (System-Browser-Aufruf beim Login), nicht im Web-Frontend. Playwright treibt einen Browser, nicht den Electron-Hauptprozess plus einen realen System-Browser.</li>
-  <li>SCHRITTE_ZU_VAGE: Kein deterministisches Kriterium testbar. 'URL parameters are cleared almost immediately' nennt keinen Schwellwert. Das Stripping ist OAuth-konformes Verhalten -- der Reporter erkennt das im Issue selbst an: 'I guess this is for security.'</li>
-  <li>UI_NICHT_AUFFINDBAR: Das gewuenschte UI (Copy-URL-Button, intermediate page, verzoegerter Redirect, manueller Login-Fallback) existiert in v2.3.0 nicht. Ein Test, der die Abwesenheit assertet, waere GRUEN, nicht ROT -- verletzt die Qualitaetsdirektive.</li>
-  <li>LABEL concern/ux: Das Repository labelt dieses Ticket selbst als 'UX polish, ergonomics, workflow complaints without a clear bug'.</li>
+  <li>CLOUD_ONLY / DESKTOP_ONLY: The trigger lives in the Electron desktop app process (system browser launch on login), not in the web frontend. Playwright drives a browser, not the Electron main process plus a real system browser.</li>
+  <li>STEPS_TOO_VAGUE: No deterministic criterion is testable. 'URL parameters are cleared almost immediately' provides no threshold. The stripping is OAuth-compliant behavior — the reporter acknowledges this in the issue itself: 'I guess this is for security.'</li>
+  <li>UI_NOT_FOUND: The requested UI elements (Copy-URL button, intermediate page, delayed redirect, manual login fallback) do not exist in v2.3.0. A test asserting their absence would be GREEN, not RED — violating the quality directive.</li>
+  <li>LABEL concern/ux: The repository itself labels this ticket as 'UX polish, ergonomics, workflow complaints without a clear bug'.</li>
 </ul>
 </div>
 
 <div class="card">
-  <h2>Was das Issue wirklich anfragt</h2>
-  <p>Feature-Wunsch fuer Multi-Browser-/Multi-Profile-User: sichtbare Login-URL, Copy-Button, verzoegerter Redirect oder manueller Login-Fallback. Der Reporter erkennt selbst an, dass das Stripping der Auth-Params 'I guess this is for security' beabsichtigt ist.</p>
+  <h2>What the Issue Actually Requests</h2>
+  <p>Feature request for multi-browser / multi-profile users: a visible login URL, a Copy button, a delayed redirect, or a manual login fallback in the desktop app. The reporter themselves acknowledges that stripping the auth params is intentional: 'I guess this is for security.'</p>
 
-  <h3>Vorgeschlagene UX-Verbesserungen (aus Issue-Body)</h3>
+  <h3>Suggested UX Improvements (from issue body)</h3>
   <ul>
-  <li>Intermediate Page mit voller Redirect-URL (inkl. Auth-Params) vor dem eigentlichen Redirect</li>
-  <li>Copy URL-Button, analog zum VS-Code-Auth-Flow</li>
-  <li>Optional: leicht verzoegerter Redirect, damit manuelles Kopieren moeglich ist</li>
-  <li>Manueller Login-Fallback in der Desktop-App</li>
+  <li>Intermediate page showing the full redirect URL (incl. auth params) before the actual redirect</li>
+  <li>Copy URL button, analogous to the VS Code auth flow</li>
+  <li>Optional: slightly delayed redirect to allow manual copying</li>
+  <li>Manual login fallback in the desktop app</li>
 </ul>
   <p style="margin-top:8px; color:var(--muted); font-size:12px;">
-    Kein Element davon existiert in v2.3.0 &mdash; ein Playwright-Test der die
-    Abwesenheit assertet, waere GRUEN, nicht ROT, und wuerde die Qualitaetsdirektive verletzen.
+    None of these exist in v2.3.0 &mdash; a Playwright test asserting their
+    absence would be GREEN, not RED, violating the quality directive.
   </p>
 </div>
 
 <div class="card">
-  <h2>Evidence-Tabelle</h2>
+  <h2>Evidence Table</h2>
   <table>
 <tr><th>Issue</th><td>https://github.com/go-vikunja/vikunja/issues/2654</td></tr>
-<tr><th>App-Version (Bug)</th><td>2.3.0</td></tr>
-<tr><th>Verdict</th><td>NICHT_REPRODUZIERBAR</td></tr>
-<tr><th>Iterationen genutzt</th><td>0 / 3</td></tr>
-<tr><th>GitHub-Label</th><td>concern/ux — &quot;UX polish, ergonomics, workflow complaints without a clear bug&quot;</td></tr>
-<tr><th>Fix-PR verlinkt</th><td>nein</td></tr>
-<tr><th>Issue-Kommentare</th><td>0</td></tr>
+<tr><th>App Version (Bug)</th><td>2.3.0</td></tr>
+<tr><th>Verdict</th><td>NOT_REPRODUCIBLE</td></tr>
+<tr><th>Iterations used</th><td>0 / 3</td></tr>
+<tr><th>GitHub Label</th><td>concern/ux — &quot;UX polish, ergonomics, workflow complaints without a clear bug&quot;</td></tr>
+<tr><th>Fix PR linked</th><td>no</td></tr>
+<tr><th>Issue comments</th><td>0</td></tr>
 </table>
 </div>
 
 <div class="card">
-  <h2>Technische Begruendung</h2>
+  <h2>Technical Reasoning</h2>
 
-  <h3>Architektonisch</h3>
-  <p>Vikunja 2.3.0 wechselte den Desktop-Login von internem Browser-Dialog auf 'System-Default-Browser oeffnen'. Der Bug liegt im Uebergang Electron-App -&gt; externer Browser -&gt; Callback. Ein Playwright-Browser kann weder den Electron-Start noch den Handoff zwischen zwei realen Browsern simulieren.</p>
+  <h3>Architectural</h3>
+  <p>Vikunja 2.3.0 changed the desktop login from an internal browser dialog to 'open system default browser'. The bug lives in the handoff Electron app → external browser → callback. A Playwright browser can simulate neither the Electron startup nor the handoff between two real browsers.</p>
 
-  <h3>Semantisch</h3>
-  <p>Der Auth-Code ist ein Single-Use-OAuth-Artefakt (RFC 6749 Section 10.5). Er wird nach dem Token-Austausch korrekt aus der URL entfernt. Das ist kein Defekt, sondern Sicherheitsdesign. Ein Test, der dieses korrekte Verhalten als Fehler assertet, waere falsch positiv.</p>
+  <h3>Semantic</h3>
+  <p>The auth code is a single-use OAuth artifact (RFC 6749 Section 10.5). It is correctly removed from the URL after the token exchange. This is not a defect but intentional security design. A test asserting this correct behavior as a failure would be a false positive.</p>
 
   <h3>Scope</h3>
-  <p>Kyron-Scope (Projektmemo): 'nur UI-Bugs (Playwright-tauglich), keine Backend-only Issues'. Desktop-App + Multi-Browser-Handoff faellt ausserhalb dieses Scopes.</p>
+  <p>Kyron scope (project memo): 'UI bugs only (Playwright-compatible), no backend-only issues'. Desktop app + multi-browser handoff falls outside this scope.</p>
 </div>
 
 <div class="card">
-  <h2>Was untersucht wurde</h2>
+  <h2>What Was Investigated</h2>
   <ul>
-  <li>GitHub-Issue-API abgefragt: Body, Labels, Kommentare (keine Kommentare, kein Fix-PR verlinkt)</li>
-  <li>Docker-Hub geprueft: vikunja/vikunja:2.3.0 ist verfuegbar als Docker-Image</li>
-  <li>v2.3.0-Quellbaum gescannt (API git/trees): Verzeichnisstruktur des Frontends untersucht, Login.vue und Router-Routing-Logik identifiziert</li>
-  <li>System-Browser-Aufruf liegt im Electron-Main-Process (separates Desktop-Modul), nicht im Web-Frontend -- bestaetigt Befund DESKTOP_ONLY</li>
-  <li>Kein verlinkter Fix-PR, kein Root-Cause-Commit aus dem Issue</li>
+  <li>Queried GitHub Issue API: body, labels, comments (0 comments, no fix PR linked)</li>
+  <li>Checked Docker Hub: vikunja/vikunja:2.3.0 is available as a Docker image</li>
+  <li>Scanned v2.3.0 source tree (API git/trees): examined frontend directory structure, identified Login.vue and router routing logic</li>
+  <li>System browser launch is located in the Electron main process (separate desktop module), not in the web frontend — confirms DESKTOP_ONLY finding</li>
+  <li>No linked fix PR, no root-cause commit referenced from the issue</li>
 </ul>
 </div>
 
 <div class="card">
-  <h2>Empfehlung</h2>
-  <p>Nicht als Playwright-Test reproduzieren. Das Ticket ist ein legitimer UX-Verbesserungsvorschlag. Entweder (a) manuell mit zwei Browsern verifizieren und als UX-Feedback ans Vikunja-Team zurueckspiegeln, oder (b) die Electron-Codebasis via @playwright/test electron()-API adressieren -- ausserhalb von Kyron Phase 1.</p>
+  <h2>Recommendation</h2>
+  <p>Do not reproduce as a Playwright test. The ticket is a legitimate UX improvement request. Either (a) verify manually with two browsers and report back as UX feedback to the Vikunja team, or (b) address the Electron codebase via the @playwright/test electron() API — outside Kyron Phase 1 scope.</p>
 </div>
 
 <p class="footer">
   Generated by @reprod (Kyron Phase 1) &middot;
-  Kein Screenshot &mdash; Bail-out vor Browser-Interaktion &middot;
-  2026-04-23T21:56:14.982Z
+  No screenshot &mdash; bail-out before browser interaction &middot;
+  2026-04-23T22:02:28.725Z
 </p>
 
 </main>
