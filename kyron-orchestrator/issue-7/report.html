@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kyron-orchestrator #7 — Bug Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 24px; color: #333; background: #f9f9f9; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { font-size: 1.6em; border-bottom: 2px solid #d73a49; padding-bottom: 12px; margin-bottom: 24px; }
+    h2 { font-size: 1.2em; margin-top: 32px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .verdict-bug { background: #ffeef0; border: 2px solid #d73a49; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+    .verdict-bug .label { color: #d73a49; font-weight: bold; font-size: 1.1em; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #ddd; padding: 10px 14px; text-align: left; }
+    th { background: #f6f8fa; font-weight: 600; }
+    .bug-row { background: #ffeef0; }
+    .ok-row { background: #e6ffed; }
+    .bug-highlight { color: #d73a49; font-weight: bold; }
+    .ok-highlight { color: #28a745; font-weight: bold; }
+    code { background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 0.85em; line-height: 1.5; border: 1px solid #e1e4e8; }
+    .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
+    .badge-bug { display: inline-block; background: #d73a49; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.8em; margin-left: 8px; vertical-align: middle; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>
+    kyron-orchestrator Issue #7: updatePhase reports "Phase not found" when job does not exist
+    <span class="badge-bug">BUG CONFIRMED</span>
+  </h1>
+
+  <p class="meta">
+    Version: <strong>main</strong> |
+    Job: <strong>8cc06df7-3e43-44eb-990e-1ab665cbfd0d</strong> |
+    Reproduced: <strong>2026-04-24</strong> |
+    Issue: <a href="https://github.com/tunichgud/vlyby-kyron-orchestrator/issues/7">https://github.com/tunichgud/vlyby-kyron-orchestrator/issues/7</a>
+  </p>
+
+  <div class="verdict-bug">
+    <div class="label">BUG CONFIRMED</div>
+    <p style="margin:8px 0 0;">Calling <code>kyron_phase_update</code> with a non-existent job UUID returns <code>Error: Phase not found: triage for job &lt;id&gt;</code> instead of <code>Error: Job not found: &lt;id&gt;</code>. The misleading message implies the job exists but lacks the named phase, making it impossible to distinguish a wrong job ID from a wrong phase name.</p>
+  </div>
+
+  <h2>Root Cause</h2>
+  <p><code>JobService.updatePhase</code> at line 177 queries <code>job_phases</code> without first checking job existence:</p>
+  <pre>public void updatePhase(UUID jobId, PhaseUpdateRequest request) {
+    JobPhase phase = jobPhaseRepository.findByJobIdAndPhaseName(jobId, request.phase())
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Phase not found: " + request.phase() + " for job " + jobId));
+    // ← no prior check: jobRepository.existsById(jobId)
+}</pre>
+  <p>When the job doesn't exist, no phases are found either, so the code falls into the same <code>orElseThrow</code> branch as a genuinely missing phase name.</p>
+
+  <h2>Suggested Fix</h2>
+  <pre>public void updatePhase(UUID jobId, PhaseUpdateRequest request) {
+    if (!jobRepository.existsById(jobId)) {
+        throw new IllegalArgumentException("Job not found: " + jobId);
+    }
+    JobPhase phase = jobPhaseRepository.findByJobIdAndPhaseName(jobId, request.phase())
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Phase not found: " + request.phase() + " for job " + jobId));
+    ...
+}</pre>
+
+  <h2>API Evidence</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Call</th>
+        <th>Expected</th>
+        <th>Actual</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="bug-row">
+        <td>1</td>
+        <td><code>kyron_phase_update({job_id: "00000000-dead-beef-…", phase: "triage", status: "running"})</code></td>
+        <td>Error: Job not found: 00000000-dead-beef-…</td>
+        <td class="bug-highlight">Error: Phase not found: triage for job 00000000-dead-beef-… ⚠</td>
+        <td><strong>BUG CONFIRMED</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Raw Evidence</h2>
+  <pre>{
+  "issue": "https://github.com/tunichgud/vlyby-kyron-orchestrator/issues/7",
+  "title": "bug: updatePhase reports 'Phase not found' when the job itself does not exist",
+  "reproducedAt": "2026-04-24T20:45:00Z",
+  "agent": "reprod",
+  "jobId": "8cc06df7-3e43-44eb-990e-1ab665cbfd0d",
+  "bugConfirmed": true,
+  "evidence": [
+    {
+      "step": "kyron_phase_update({job_id: '00000000-dead-beef-0000-000000000000', phase: 'triage', status: 'running'})",
+      "expected": "Error: Job not found: 00000000-dead-beef-0000-000000000000",
+      "actual": "Error: Phase not found: triage for job 00000000-dead-beef-0000-000000000000",
+      "verdict": "BUG CONFIRMED — misleading error: implies job exists but has no triage phase"
+    }
+  ],
+  "rootCause": "JobService.updatePhase at line 177 queries job_phases directly without first checking job existence. When the job does not exist, no phases are found either, so the error is 'Phase not found' instead of 'Job not found'.",
+  "affectedCode": "src/main/java/de/vlyby/kyron/service/JobService.java:177"
+}</pre>
+
+</div>
+
+<footer style="margin-top:48px; padding-top:16px; border-top:1px solid #e1e4e8; color:#6a737d; font-size:0.82em; text-align:center;">
+  Generated by <a href="https://kyron.vlyby.de" style="color:#6a737d;">Kyron</a> &bull; Automated bug reproduction
+</footer>
+
+</body>
+</html>
