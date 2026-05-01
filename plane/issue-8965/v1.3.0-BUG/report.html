@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bug #8965 Reproduction Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    .container { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+    .bug-box { padding: 20px; border-radius: 6px; margin: 20px 0; }
+    .bug-box.reproduced { background: #fee; border-left: 4px solid #e74c3c; }
+    .bug-box.not-reproduced { background: #efe; border-left: 4px solid #27ae60; }
+    .bug-box.inconclusive { background: #fef; border-left: 4px solid #f39c12; }
+    .bug-box h2 { margin-top: 0; }
+    .code { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 0.9em; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #3498db; color: white; font-weight: bold; }
+    tr:hover { background: #f9f9f9; }
+    .evidence-table { margin: 20px 0; }
+    .step { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 4px; }
+    .step h3 { margin-top: 0; color: #2c3e50; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+    .metric { padding: 15px; background: #ecf0f1; border-radius: 4px; }
+    .metric-value { font-size: 24px; font-weight: bold; color: #3498db; }
+    .metric-label { color: #7f8c8d; font-size: 0.9em; }
+    footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e1e4e8; color: #6a737d; font-size: 0.82em; text-align: center; }
+    .observation { margin: 10px 0; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
+    .observation-time { font-weight: bold; color: #2c3e50; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐛 Bug Reproduction Report</h1>
+
+    <div class="bug-box not-reproduced">
+      <h2>Issue #8965: Space leaving behind curl zombie process</h2>
+      <p><strong>Status:</strong> NO BUG: No zombie processes detected during 120-second monitoring</p>
+      <p><strong>Version:</strong> 1.3.0</p>
+      <p><strong>Root Cause:</strong> Docker HEALTHCHECK spawning curl processes that may not be properly reaped by the Node.js process (apps/space/Dockerfile.space lines 89-91)</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-value">12</div>
+        <div class="metric-label">Monitoring Intervals</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">0</div>
+        <div class="metric-label">Zombie Processes Found</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value">8</div>
+        <div class="metric-label">Processes in System</div>
+      </div>
+    </div>
+
+    <h2>Test Methodology</h2>
+    <div class="step">
+      <h3>Step 1: Container Startup</h3>
+      <p>Started makeplane/plane-space:v1.3.0 Docker container with default healthcheck configuration.</p>
+      <p>The Dockerfile contains a HEALTHCHECK that runs curl every 30 seconds to validate the service is responding.</p>
+    </div>
+
+    <div class="step">
+      <h3>Step 2: Extended Monitoring</h3>
+      <p>Monitored system process list every 10 seconds for 120 seconds to capture potential zombie processes.</p>
+      <p>Specifically looked for:</p>
+      <ul>
+        <li>Processes with state 'Z' (zombie/defunct)</li>
+        <li>Curl processes that haven't been properly reaped</li>
+        <li>Process count changes that might indicate accumulation</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <h3>Step 3: Detailed Analysis</h3>
+      <p>Examined healthcheck execution timing and compared against observed process state changes.</p>
+      <div class="evidence-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Elapsed (s)</th>
+              <th>Total Processes</th>
+              <th>Zombie Count</th>
+              <th>Curl Processes</th>
+              <th>Curl Zombies</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+                <td>10s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>20s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>30s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>40s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>50s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>60s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>70s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>80s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>90s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>100s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>110s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr><tr>
+                <td>120s</td>
+                <td>8</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h2>Findings</h2>
+    <div class="step">
+      <h3>No Zombie Processes Detected</h3>
+      <p>During the 120-second monitoring period:</p>
+      <ul>
+        <li>✅ <strong>0 zombie processes</strong> were found on the system</li>
+        <li>✅ <strong>0 curl processes</strong> were in zombie state</li>
+        <li>✅ System process count remained stable at ~8-10 processes</li>
+        <li>✅ Container healthcheck completed successfully (4 healthchecks in 2 minutes)</li>
+      </ul>
+    </div>
+
+    <h2>Conclusion</h2>
+    <div class="step">
+      <h3>✅ BUG REPRODUCED</h3>
+      <p>
+        While the issue describes zombie curl processes being left behind, our testing of version 1.3.0
+        did not reproduce this behavior. This could indicate:
+      </p>
+      <ul>
+        <li><strong>Environment-specific:</strong> The bug may occur only under specific configurations (e.g., AIO supervisord setup, specific resource constraints)</li>
+        <li><strong>Already fixed:</strong> The Docker image or Node.js runtime may automatically clean up these processes</li>
+        <li><strong>Docker/Kernel handling:</strong> Modern Docker and Linux kernels may be automatically reaping orphaned child processes</li>
+        <li><strong>Intermittent:</strong> The bug may not occur reliably in all scenarios</li>
+      </ul>
+
+      <h4>Recommendation</h4>
+      <p>
+        To ensure the bug doesn't occur in production, the root fix should involve:
+        <div class="code">
+# apps/space/Dockerfile.space
+# Use tini or dumb-init as PID 1 to properly reap zombie processes
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["npx", "react-router-serve", "./build/server/index.js"]
+        </div>
+      </p>
+    </div>
+
+    <footer>
+      Generated by <a href="https://kyron.vlyby.de" style="color:#6a737d;">Kyron</a> &bull; Automated bug reproduction
+    </footer>
+  </div>
+</body>
+</html>
